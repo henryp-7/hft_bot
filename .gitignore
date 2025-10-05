@@ -1,0 +1,32 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment and secrets
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/
+
+# Runtime data (simulation outputs)
+data/
+!data/.gitkeep
+
+# Logs
+*.log
+
+# Backup / temp files
+*.bak
+*.tmp
