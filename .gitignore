@@ -13,6 +13,9 @@ venv/
 .env.*
 !.env.example
 
+# Private trading logic
+main/strategies/*.py
+
 # OS files
 .DS_Store
 Thumbs.db
