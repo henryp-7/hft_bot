@@ -3,6 +3,8 @@ import asyncio
 import logging
 import uuid
 from typing import Dict, Optional
+from colorama import init, Fore, Style
+init(autoreset=True)
 
 from .config import Settings
 from main.datafeeds import LiveBinanceDataStream
@@ -62,20 +64,35 @@ class Engine:
                 if fill:
                     self.storage.append_fill(fill)
                     eq = self.portfolio.mark_to_market(self.stream.latest)
+                    value = abs(fill.qty) * fill.price  # trade notional
+
+                    # Colors: BUY/SELL in yellow/magenta, value in light blue
+                    side_color = Fore.LIGHTYELLOW_EX if fill.side == OrderSide.BUY else Fore.LIGHTMAGENTA_EX
+                    value_color = Fore.LIGHTBLUE_EX
+
                     log.info(
-                        "Paper fill %s %s %.6f @ %.4f | Equity ~ %.2f",
-                        fill.symbol,
-                        fill.side,
-                        abs(fill.qty),
-                        fill.price,
-                        eq,
+                        f"Paper fill {fill.symbol} "
+                        f"{side_color}{fill.side}{Style.RESET_ALL} "
+                        f"{abs(fill.qty):.6f} @ {fill.price:.4f} "
+                        f"{value_color}= {value:.2f}{Style.RESET_ALL} "
+                        f"| Equity ~ {eq:.2f}"
                     )
 
             if self.rest_exec:
                 try:
                     live_fill = self.rest_exec.place_order(order)
                     if live_fill:
-                        log.info("Live order placed on Binance id=%s", live_fill.order_id)
+                        value = abs(live_fill.qty) * live_fill.price
+                        side_color = Fore.LIGHTYELLOW_EX if live_fill.side == OrderSide.BUY else Fore.LIGHTMAGENTA_EX
+                        value_color = Fore.LIGHTBLUE_EX
+
+                        log.info(
+                            f"Live order {live_fill.symbol} "
+                            f"{side_color}{live_fill.side}{Style.RESET_ALL} "
+                            f"{abs(live_fill.qty):.6f} @ {live_fill.price:.4f} "
+                            f"{value_color}= {value:.2f}{Style.RESET_ALL} "
+                            f"| Equity ~ {eq:.2f}"
+                        )
                 except Exception as e:
                     log.error(f"Live order error: {e}")
 
