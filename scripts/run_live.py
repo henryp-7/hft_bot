@@ -14,10 +14,7 @@ def main():
     strat = Strategy(cfg.symbols, target_gross_notional=target_gross)
     eng = Engine(cfg, strat, storage, live_trading=True)
     print("Starting live trading on Binance Spot (real funds)...")
-    try:
-        asyncio.run(eng.run())
-    except KeyboardInterrupt:
-        print("\nStopping live trading...\n")
+    asyncio.run(eng.run())
 
 if __name__ == "__main__":
     main()
