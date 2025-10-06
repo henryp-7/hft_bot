@@ -12,6 +12,13 @@ def _env_list(key: str, default: List[str]) -> List[str]:
         return default
     return [s.strip().lower() for s in raw.split(",") if s.strip()]
 
+
+def _env_bool(key: str, default: bool = False) -> bool:
+    raw = os.getenv(key)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
 class Settings(BaseModel):
     symbols: List[str] = Field(default_factory=lambda: _env_list("SYMBOLS", ["btcusdt", "ethusdt"]))
     quote_ccy: str = os.getenv("QUOTE_CCY", "USDT")
@@ -24,3 +31,12 @@ class Settings(BaseModel):
     # API keys (required when submitting live orders)
     binance_api_key: Optional[str] = os.getenv("BINANCE_API_KEY") or None
     binance_api_secret: Optional[str] = os.getenv("BINANCE_API_SECRET") or None
+    binance_us: bool = Field(default_factory=lambda: _env_bool("BINANCE_US", False))
+
+    @property
+    def binance_rest_base(self) -> str:
+        return "https://api.binance.us" if self.binance_us else "https://api.binance.com"
+
+    @property
+    def binance_ws_host(self) -> str:
+        return "stream.binance.us:9443" if self.binance_us else "stream.binance.com:9443"

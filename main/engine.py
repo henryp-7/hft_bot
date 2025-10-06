@@ -22,7 +22,7 @@ class Engine:
         self.storage = storage
         self.live_trading = live_trading
 
-        self.stream = LiveBinanceDataStream(cfg.symbols)
+        self.stream = LiveBinanceDataStream(cfg.symbols, host=cfg.binance_ws_host)
         self.portfolio = Portfolio(quote_ccy=cfg.quote_ccy, cash=cfg.initial_cash)
         self.paper_books: Dict[str, MarketTick] = {}
         self.slippage_bps = cfg.slippage_bps
@@ -35,6 +35,7 @@ class Engine:
             self.rest_exec = BinanceRestExec(
                 cfg.binance_api_key,
                 cfg.binance_api_secret,
+                base_url=cfg.binance_rest_base,
             )
 
     async def handle_tick(self, tick: MarketTick):
