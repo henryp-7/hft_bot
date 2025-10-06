@@ -11,7 +11,7 @@ def main():
     # Equal-weight example: aim to deploy half of total notional cap
     target_gross = min(cfg.max_total_notional, cfg.initial_cash) * 0.5
     strat = Strategy(cfg.symbols, target_gross_notional=target_gross)
-    eng = Engine(cfg, strat, storage)
+    eng = Engine(cfg, strat, storage, live_trading=False)
     print("Starting paper trading with live Binance market data...")
     asyncio.run(eng.run())
 
