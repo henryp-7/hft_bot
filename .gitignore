@@ -14,7 +14,7 @@ venv/
 !.env.example
 
 # Private trading logic
-main/strategies/obi_intraday-momentum.py
+strategies/obi_intraday-momentum.py
 
 # OS files
 .DS_Store
