@@ -16,13 +16,19 @@ class Settings(BaseModel):
     symbols: List[str] = Field(default_factory=lambda: _env_list("SYMBOLS", ["btcusdt", "ethusdt"]))
     quote_ccy: str = os.getenv("QUOTE_CCY", "USDT")
     initial_cash: float = float(os.getenv("INITIAL_CASH", "10000"))
-    use_testnet: bool = os.getenv("USE_TESTNET", "false").lower() == "true"
-
     slippage_bps: float = float(os.getenv("SLIPPAGE_BPS", "1"))
 
     max_notional_per_symbol: float = float(os.getenv("MAX_NOTIONAL_PER_SYMBOL", "5000"))
     max_total_notional: float = float(os.getenv("MAX_TOTAL_NOTIONAL", "10000"))
 
-    # API keys (only used if use_testnet)
+    # API keys (required when submitting live orders)
     binance_api_key: Optional[str] = os.getenv("BINANCE_API_KEY") or None
     binance_api_secret: Optional[str] = os.getenv("BINANCE_API_SECRET") or None
+
+    @property
+    def binance_rest_base(self) -> str:
+        return "https://api.binance.us"
+
+    @property
+    def binance_ws_host(self) -> str:
+        return "stream.binance.us:9443"
