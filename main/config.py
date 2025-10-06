@@ -17,12 +17,13 @@ class Settings(BaseModel):
     quote_ccy: str = os.getenv("QUOTE_CCY", "USDT")
     initial_cash: float = float(os.getenv("INITIAL_CASH", "10000"))
     use_testnet: bool = os.getenv("USE_TESTNET", "false").lower() == "true"
+    enable_live_trading: bool = os.getenv("ENABLE_LIVE_TRADING", "false").lower() == "true"
 
     slippage_bps: float = float(os.getenv("SLIPPAGE_BPS", "1"))
 
     max_notional_per_symbol: float = float(os.getenv("MAX_NOTIONAL_PER_SYMBOL", "5000"))
     max_total_notional: float = float(os.getenv("MAX_TOTAL_NOTIONAL", "10000"))
 
-    # API keys (only used if use_testnet)
+    # API keys (required when ENABLE_LIVE_TRADING=true)
     binance_api_key: Optional[str] = os.getenv("BINANCE_API_KEY") or None
     binance_api_secret: Optional[str] = os.getenv("BINANCE_API_SECRET") or None
