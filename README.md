@@ -7,7 +7,7 @@
 > Use at your own risk. No financial advice.
 
 ## Features
-- **Live market data** via **Binance WebSocket `bookTicker`** (free, no API key for data).
+- **Live market data** via **Binance WebSocket `bookTicker`** (free, no API key for data) with opt-in historical replays.
 - **Modular architecture**: data, engine, execution, strategy, risk, portfolio.
 - **Strategy plug-in**: `strategies/strategy.py` includes a generic **EqualWeightStrategy** example; replace with your own.
 - **Paper trading** execution (simulated fills on best bid/ask) + optional **Binance Spot Testnet** execution.
@@ -43,21 +43,51 @@ python scripts/run_live_testnet.py
 - This code avoids paid / rate-limited REST feeds and uses the public WebSocket for real-time best bid/ask.
 - This project is educational. Trading crypto or any asset involves significant risk.
 
+### Switching between live data and Binance Vision replays
+
+If you are waiting on Binance API approval (or just want to backtest), you can replay archived
+`bookTicker` data from <https://data.binance.vision/>.
+
+Set the following environment variables (e.g. in `.env`) to enable the replay stream:
+
+```
+DATA_SOURCE=vision
+BINANCE_VISION_DATA_DIR=./data/binance_vision   # optional, defaults to ./data/binance_vision
+BINANCE_VISION_SPEEDUP=4                        # optional, speeds up playback
+BINANCE_VISION_LOOP=false                       # optional, stop at end of dataset
+```
+
+Then download the desired monthly archives (e.g. `BTCUSDT-bookTicker-2024-01.zip`) and place the
+`.zip` or `.csv` files inside the folder referenced by `BINANCE_VISION_DATA_DIR`. The loader matches
+files that contain both the symbol name and dataset name (`bookTicker` by default).
+
+Run the paper engine as usual:
+
+```
+python scripts/run_paper.py
+```
+
+The engine will consume the historical ticks locally instead of the live WebSocket feed, keeping the
+rest of the pipeline identical. Set `DATA_SOURCE=live` (or remove the variable) to switch back to
+real-time streaming.
+
 ## Repo Layout
 
 ```
-hft-bot-starter/
-  hftbot/
-    __init__.py
-    engine.py
-    config.py
-    utils.py
-    models.py
-    portfolio.py
-    risk.py
-    storage.py
-    data/
-      binance.py
+  hft_bot/
+    main/
+      __init__.py
+      engine.py
+      config.py
+      utils.py
+      models.py
+      portfolio.py
+      risk.py
+      storage.py
+      datafeeds/
+        __init__.py
+        live_stream.py
+        vision_stream.py
     execution/
       paper.py
       binance_exec.py

@@ -5,8 +5,8 @@ import uuid
 from typing import Dict, Optional
 
 from .config import Settings
-#from data.binance import BinanceDataStream
-from data.vision_stream import VisionDataStream as BinanceDataStream
+from main.datafeeds.live_stream import LiveBinanceDataStream
+from main.datafeeds.vision_stream import VisionDataStream
 from execution.paper import PaperExecution
 from execution.binance_exec import BinanceRestExec
 from main.models import MarketTick, OrderRequest, OrderType
@@ -23,7 +23,7 @@ class Engine:
         self.strategy = strategy
         self.storage = storage
 
-        self.stream = BinanceDataStream(cfg.symbols, testnet=False)  # use public mainnet for data
+        self.stream = self._build_stream()
         self.portfolio = Portfolio(quote_ccy=cfg.quote_ccy, cash=cfg.initial_cash)
         self.paper_exec = PaperExecution(self.portfolio, slippage_bps=cfg.slippage_bps)
         self.rest_exec: Optional[BinanceRestExec] = None
@@ -66,3 +66,25 @@ class Engine:
         setup_logging()
         async for tick in self.stream.stream():
             await self.handle_tick(tick)
+
+    def _build_stream(self):
+        source = self.cfg.data_source
+        if source == "vision":
+            try:
+                return VisionDataStream(
+                    self.cfg.symbols,
+                    testnet=self.cfg.use_testnet,
+                    data_dir=self.cfg.vision_data_dir,
+                    dataset=self.cfg.vision_dataset,
+                    speedup=self.cfg.vision_speedup,
+                    loop_forever=self.cfg.vision_loop_forever,
+                )
+            except FileNotFoundError as exc:
+                default_dir = self.cfg.vision_data_dir or "./data/binance_vision"
+                raise FileNotFoundError(
+                    "Vision dataset not found. Download archives from https://data.binance.vision/ "
+                    f"and place them under '{default_dir}'."
+                ) from exc
+        if source == "live":
+            return LiveBinanceDataStream(self.cfg.symbols, testnet=self.cfg.use_testnet)
+        raise ValueError(f"Unknown data source '{source}'. Set DATA_SOURCE to 'live' or 'vision'.")

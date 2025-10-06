@@ -18,6 +18,13 @@ class Settings(BaseModel):
     initial_cash: float = float(os.getenv("INITIAL_CASH", "10000"))
     use_testnet: bool = os.getenv("USE_TESTNET", "false").lower() == "true"
 
+    # Datafeed configuration
+    data_source: str = os.getenv("DATA_SOURCE", "live").lower()
+    vision_data_dir: Optional[str] = os.getenv("BINANCE_VISION_DATA_DIR")
+    vision_dataset: str = os.getenv("BINANCE_VISION_DATASET", "bookTicker")
+    vision_speedup: float = float(os.getenv("BINANCE_VISION_SPEEDUP", "1"))
+    vision_loop_forever: bool = os.getenv("BINANCE_VISION_LOOP", "true").lower() == "true"
+
     slippage_bps: float = float(os.getenv("SLIPPAGE_BPS", "1"))
 
     max_notional_per_symbol: float = float(os.getenv("MAX_NOTIONAL_PER_SYMBOL", "5000"))
