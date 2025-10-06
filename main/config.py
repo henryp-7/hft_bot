@@ -24,3 +24,11 @@ class Settings(BaseModel):
     # API keys (required when submitting live orders)
     binance_api_key: Optional[str] = os.getenv("BINANCE_API_KEY") or None
     binance_api_secret: Optional[str] = os.getenv("BINANCE_API_SECRET") or None
+
+    @property
+    def binance_rest_base(self) -> str:
+        return "https://api.binance.us"
+
+    @property
+    def binance_ws_host(self) -> str:
+        return "stream.binance.us:9443"

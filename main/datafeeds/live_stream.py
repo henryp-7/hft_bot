@@ -16,13 +16,12 @@ log = logging.getLogger(__name__)
 class LiveBinanceDataStream:
     """Stream real-time bookTicker data from Binance public websockets."""
 
-    def __init__(self, symbols: Iterable[str]) -> None:
+    def __init__(self, symbols: Iterable[str], host: str = "stream.binance.us:9443") -> None:
         self.symbols = [s.lower() for s in symbols]
         if not self.symbols:
             raise ValueError("LiveBinanceDataStream requires at least one symbol")
         self.latest: Dict[str, MarketTick] = {}
         stream_names = "/".join(f"{sym}@bookTicker" for sym in self.symbols)
-        host = "stream.binance.com:9443"
         self._url = f"wss://{host}/stream?streams={stream_names}"
 
     async def stream(self) -> AsyncGenerator[MarketTick, None]:

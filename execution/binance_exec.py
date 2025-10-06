@@ -5,7 +5,7 @@ import httpx
 from main.models import OrderRequest, OrderType, OrderSide, Fill
 from main.utils import now_ms
 
-BINANCE_BASE = "https://api.binance.com"
+BINANCE_BASE = "https://api.binance.us"
 
 class BinanceRestExec:
     """Very small subset of Binance Spot REST for live Binance Spot trading."""

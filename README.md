@@ -7,7 +7,7 @@
 > Use at your own risk. No financial advice.
 
 ## Features
-- **Live market data** via **Binance WebSocket `bookTicker`** (free, no API key for data).
+- **Live market data** via **Binance.US WebSocket `bookTicker`** (free, no API key for data).
 - **Modular architecture**: data, engine, execution, strategy, risk, portfolio.
 - **Strategy plug-in**: `strategies/strategy.py` includes a generic **EqualWeightStrategy** example; replace with your own.
 - **Paper trading** execution (simulated fills on best bid/ask) + optional **Binance Spot** order routing.
@@ -21,7 +21,7 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# Edit .env to choose symbols, risk limits, and (optionally) provide Binance API keys for live trading.
+# Edit .env to choose symbols, risk limits, and (optionally) provide Binance.US API keys for live trading.
 
 # Run live paper-trading with real-time data
 python scripts/run_paper.py
@@ -38,8 +38,8 @@ python scripts/run_live.py
 - **CSV logs** in `./data/ticks_*.csv` and `./data/fills.csv`.
 
 ### Notes
-- **Symbols** are Binance spot symbols (e.g., `btcusdt`, `ethusdt`). They must be lowercase in the config.
-- Live trading uses the production **Binance Spot** venue. Provide `BINANCE_API_KEY` and `BINANCE_API_SECRET` in `.env` before running `run_live.py`, and understand the risks of trading real funds.
+- **Symbols** are Binance.US spot symbols (e.g., `btcusdt`, `ethusdt`). They must be lowercase in the config.
+- Live trading uses the production **Binance.US Spot** venue. Provide `BINANCE_API_KEY` and `BINANCE_API_SECRET` in `.env` before running `run_live.py`, and understand the risks of trading real funds.
 - This code avoids paid / rate-limited REST feeds and uses the public WebSocket for real-time best bid/ask.
 - This project is educational. Trading crypto or any asset involves significant risk.
 
@@ -60,7 +60,6 @@ hft-bot-starter/
       __init__.py
       live_stream.py
   execution/
-    paper.py
     binance_exec.py
   strategies/
     __init__.py
