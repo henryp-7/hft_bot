@@ -1,8 +1,8 @@
 from __future__ import annotations
 from typing import Dict, Optional
-from core.models import MarketTick, OrderRequest, OrderType, OrderSide, Fill
-from core.portfolio import Portfolio
-from core.utils import now_ms
+from main.models import MarketTick, OrderRequest, OrderType, OrderSide, Fill
+from main.portfolio import Portfolio
+from main.utils import now_ms
 
 class PaperExecution:
     """Simulates order fills using best bid/ask from latest ticks."""

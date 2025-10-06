@@ -9,11 +9,11 @@ from .config import Settings
 from data.vision_stream import VisionDataStream as BinanceDataStream
 from execution.paper import PaperExecution
 from execution.binance_exec import BinanceRestExec
-from core.models import MarketTick, OrderRequest, OrderType
-from core.portfolio import Portfolio
-from core.risk import check_risk
-from core.storage import CSVStorage
-from core.utils import setup_logging
+from main.models import MarketTick, OrderRequest, OrderType
+from main.portfolio import Portfolio
+from main.risk import check_risk
+from main.storage import CSVStorage
+from main.utils import setup_logging
 
 log = logging.getLogger(__name__)
 
