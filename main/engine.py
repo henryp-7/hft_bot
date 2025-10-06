@@ -29,6 +29,7 @@ class Engine:
         self.paper_books: Dict[str, MarketTick] = {}
         self.slippage_bps = cfg.slippage_bps
         self.rest_exec: Optional[BinanceRestExec] = None
+        self._last_reported_pnl: Optional[float] = None
         if self.live_trading:
             if not cfg.binance_api_key or not cfg.binance_api_secret:
                 raise ValueError(
@@ -77,7 +78,8 @@ class Engine:
                         f"{value_color}= {value:.2f}{Style.RESET_ALL} "
                         f"| Equity ~ {eq:.2f}"
                     )
-
+                    self._print_pnl_summary()
+                    
             if self.rest_exec:
                 try:
                     live_fill = self.rest_exec.place_order(order)
@@ -91,15 +93,25 @@ class Engine:
                             f"{side_color}{live_fill.side}{Style.RESET_ALL} "
                             f"{abs(live_fill.qty):.6f} @ {live_fill.price:.4f} "
                             f"{value_color}= {value:.2f}{Style.RESET_ALL} "
-                            f"| Equity ~ {eq:.2f}"
+                            f"| Equity ~ {self.portfolio.mark_to_market(self.stream.latest):.2f}"
                         )
+                        self._print_pnl_summary()
                 except Exception as e:
                     log.error(f"Live order error: {e}")
 
     async def run(self):
         setup_logging()
-        async for tick in self.stream.stream():
-            await self.handle_tick(tick)
+        try:
+            async for tick in self.stream.stream():
+                await self.handle_tick(tick)
+        except asyncio.CancelledError:
+            log.info("Engine run cancelled")
+            raise
+        except Exception:
+            log.exception("Engine encountered an unexpected error")
+            raise
+        finally:
+            self._print_pnl_summary(force=True)
 
     def _simulate_paper_fill(self, order: OrderRequest) -> Optional[Fill]:
         book = self.paper_books.get(order.symbol)
@@ -135,3 +147,26 @@ class Engine:
         )
         self.portfolio.on_fill(fill)
         return fill
+
+    def _print_pnl_summary(self, *, force: bool = False) -> None:
+        ticks = self.stream.latest
+        equity = self.portfolio.mark_to_market(ticks) if ticks else self.portfolio.cash
+        pnl = equity - self.cfg.initial_cash
+
+        if not force and self._last_reported_pnl is not None:
+            if abs(pnl - self._last_reported_pnl) < 1e-9:
+                return
+
+        self._last_reported_pnl = pnl
+        color = Fore.GREEN if pnl >= 0 else Fore.RED
+        border = "=" * 40
+        summary = [
+            "",
+            f"{Style.BRIGHT}{border} SESSION SUMMARY {border}{Style.RESET_ALL}",
+            f"Start Cash : {self.cfg.initial_cash:.2f} {self.portfolio.quote_ccy}",
+            f"Equity     : {equity:.2f} {self.portfolio.quote_ccy}",
+            f"P/L        : {color}{pnl:+.2f} {self.portfolio.quote_ccy}{Style.RESET_ALL}",
+            f"{Style.BRIGHT}{'=' * (len(border) * 2 + len(' SESSION SUMMARY '))}{Style.RESET_ALL}",
+            "",
+        ]
+        log.info("\n%s", "\n".join(summary))
