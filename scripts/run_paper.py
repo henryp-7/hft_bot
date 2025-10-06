@@ -13,10 +13,7 @@ def main():
     strat = Strategy(cfg.symbols, target_gross_notional=target_gross)
     eng = Engine(cfg, strat, storage, live_trading=False)
     print("Starting paper trading with live Binance market data...")
-    try:
-        asyncio.run(eng.run())
-    except KeyboardInterrupt:
-        print("\nStopping paper trading...\n")
+    asyncio.run(eng.run())
 
 if __name__ == "__main__":
     main()

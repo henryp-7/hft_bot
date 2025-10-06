@@ -1,7 +1,6 @@
 from __future__ import annotations
 import asyncio
 import logging
-import time
 import uuid
 from typing import Dict, Optional
 from colorama import init, Fore, Style
@@ -27,12 +26,9 @@ class Engine:
 
         self.stream = LiveBinanceDataStream(cfg.symbols, host=cfg.binance_ws_host)
         self.portfolio = Portfolio(quote_ccy=cfg.quote_ccy, cash=cfg.initial_cash)
-        self.initial_equity = cfg.initial_cash
         self.paper_books: Dict[str, MarketTick] = {}
         self.slippage_bps = cfg.slippage_bps
         self.rest_exec: Optional[BinanceRestExec] = None
-        self.performance_refresh_seconds = getattr(cfg, "performance_refresh_seconds", 5.0)
-        self._last_performance_report = 0.0
         if self.live_trading:
             if not cfg.binance_api_key or not cfg.binance_api_secret:
                 raise ValueError(
@@ -81,7 +77,6 @@ class Engine:
                         f"{value_color}= {value:.2f}{Style.RESET_ALL} "
                         f"| Equity ~ {eq:.2f}"
                     )
-                    self._report_performance(force=True)
 
             if self.rest_exec:
                 try:
@@ -98,19 +93,13 @@ class Engine:
                             f"{value_color}= {value:.2f}{Style.RESET_ALL} "
                             f"| Equity ~ {eq:.2f}"
                         )
-                        self._report_performance(force=True)
                 except Exception as e:
                     log.error(f"Live order error: {e}")
 
-        self._report_performance()
-
     async def run(self):
         setup_logging()
-        try:
-            async for tick in self.stream.stream():
-                await self.handle_tick(tick)
-        finally:
-            self._report_performance(force=True, final=True)
+        async for tick in self.stream.stream():
+            await self.handle_tick(tick)
 
     def _simulate_paper_fill(self, order: OrderRequest) -> Optional[Fill]:
         book = self.paper_books.get(order.symbol)
@@ -146,31 +135,3 @@ class Engine:
         )
         self.portfolio.on_fill(fill)
         return fill
-
-    def _report_performance(self, *, force: bool = False, final: bool = False) -> None:
-        now = time.time()
-        if not force and (now - self._last_performance_report) < self.performance_refresh_seconds:
-            return
-
-        equity = self.portfolio.mark_to_market(self.stream.latest) if self.stream.latest else self.portfolio.cash
-        pnl = equity - self.initial_equity
-
-        border_color = Fore.CYAN
-        border = f"{border_color}{'=' * 60}{Style.RESET_ALL}"
-        heading_prefix = "FINAL " if final else ""
-        heading = f"{border_color}{heading_prefix}PORTFOLIO PERFORMANCE{Style.RESET_ALL}"
-        pnl_color = Fore.GREEN if pnl > 0 else (Fore.RED if pnl < 0 else Fore.WHITE)
-
-        lines = [
-            "",
-            border,
-            heading,
-            f"Initial Equity: {self.initial_equity:.2f} {self.cfg.quote_ccy}",
-            f"Current Equity: {equity:.2f} {self.cfg.quote_ccy}",
-            f"P/L: {pnl_color}{pnl:+.2f} {self.cfg.quote_ccy}{Style.RESET_ALL}",
-            border,
-            "",
-        ]
-
-        log.info("\n".join(lines))
-        self._last_performance_report = now
