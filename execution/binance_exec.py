@@ -5,17 +5,15 @@ import httpx
 from main.models import OrderRequest, OrderType, OrderSide, Fill
 from main.utils import now_ms
 
-TESTNET_BASE = "https://testnet.binance.vision"
-PROD_BASE = "https://api.binance.com"
+BINANCE_BASE = "https://api.binance.com"
 
 class BinanceRestExec:
-    """Very small subset of Binance Spot REST for orders (intended for Testnet).
-    Docs: https://testnet.binance.vision/
-    """
-    def __init__(self, api_key: str, api_secret: str, use_testnet: bool = True):
+    """Very small subset of Binance Spot REST for live Binance Spot trading."""
+
+    def __init__(self, api_key: str, api_secret: str, base_url: str = BINANCE_BASE):
         self.api_key = api_key
         self.api_secret = api_secret.encode()
-        self.base = TESTNET_BASE if use_testnet else PROD_BASE
+        self.base = base_url
         self._client = httpx.Client(base_url=self.base, timeout=10.0)
 
     def _sign(self, qs: str) -> str:

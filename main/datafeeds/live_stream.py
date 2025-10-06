@@ -16,25 +16,21 @@ log = logging.getLogger(__name__)
 class LiveBinanceDataStream:
     """Stream real-time bookTicker data from Binance public websockets."""
 
-    def __init__(self, symbols: Iterable[str], testnet: bool = False) -> None:
+    def __init__(self, symbols: Iterable[str]) -> None:
         self.symbols = [s.lower() for s in symbols]
         if not self.symbols:
             raise ValueError("LiveBinanceDataStream requires at least one symbol")
-        self.testnet = testnet
         self.latest: Dict[str, MarketTick] = {}
-        host = "testnet.binance.vision" if testnet else "stream.binance.com:9443"
         stream_names = "/".join(f"{sym}@bookTicker" for sym in self.symbols)
-        if testnet:
-            self._url = f"wss://{host}/stream?streams={stream_names}"
-        else:
-            self._url = f"wss://{host}/stream?streams={stream_names}"
+        host = "stream.binance.com:9443"
+        self._url = f"wss://{host}/stream?streams={stream_names}"
 
     async def stream(self) -> AsyncGenerator[MarketTick, None]:
         backoff = 1.0
         while True:
             try:
                 async with websockets.connect(self._url, ping_interval=20, ping_timeout=20) as ws:
-                    log.info("Connected to Binance %s stream for %s", "testnet" if self.testnet else "live", ", ".join(self.symbols))
+                    log.info("Connected to Binance live stream for %s", ", ".join(self.symbols))
                     backoff = 1.0
                     async for raw in ws:
                         payload = self._extract_payload(raw)
