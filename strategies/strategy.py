@@ -1,8 +1,8 @@
 from __future__ import annotations
 import time
 from typing import Dict, List
-from ..models import MarketTick, OrderRequest, OrderSide, OrderType
-from ..portfolio import Portfolio
+from core.models import MarketTick, OrderRequest, OrderSide, OrderType
+from core.portfolio import Portfolio
 
 class Strategy:
     """Base strategy interface. Replace with your own logic.

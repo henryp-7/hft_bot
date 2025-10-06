@@ -2,8 +2,8 @@ from __future__ import annotations
 import hmac, hashlib, time
 from typing import Optional
 import httpx
-from ..models import OrderRequest, OrderType, OrderSide, Fill
-from ..utils import now_ms
+from core.models import OrderRequest, OrderType, OrderSide, Fill
+from core.utils import now_ms
 
 TESTNET_BASE = "https://testnet.binance.vision"
 PROD_BASE = "https://api.binance.com"

@@ -1,8 +1,8 @@
 import asyncio
-from hftbot.config import Settings
-from hftbot.engine import Engine
-from hftbot.storage import CSVStorage
-from hftbot.strategies.strategy import Strategy
+from core.config import Settings
+from core.engine import Engine
+from core.storage import CSVStorage
+from strategies.strategy import Strategy
 from pathlib import Path
 
 def main():

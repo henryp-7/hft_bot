@@ -5,14 +5,15 @@ import uuid
 from typing import Dict, Optional
 
 from .config import Settings
-from .data.binance import BinanceDataStream
-from .execution.paper import PaperExecution
-from .execution.binance_exec import BinanceRestExec
-from .models import MarketTick, OrderRequest, OrderType
-from .portfolio import Portfolio
-from .risk import check_risk
-from .storage import CSVStorage
-from .utils import setup_logging
+#from data.binance import BinanceDataStream
+from data.vision_stream import VisionDataStream as BinanceDataStream
+from execution.paper import PaperExecution
+from execution.binance_exec import BinanceRestExec
+from core.models import MarketTick, OrderRequest, OrderType
+from core.portfolio import Portfolio
+from core.risk import check_risk
+from core.storage import CSVStorage
+from core.utils import setup_logging
 
 log = logging.getLogger(__name__)
 
