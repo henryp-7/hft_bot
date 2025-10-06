@@ -12,6 +12,7 @@ def main():
     target_gross = min(cfg.max_total_notional, cfg.initial_cash) * 0.5
     strat = Strategy(cfg.symbols, target_gross_notional=target_gross)
     eng = Engine(cfg, strat, storage)
+    print("Starting paper trading with live Binance market data...")
     asyncio.run(eng.run())
 
 if __name__ == "__main__":
